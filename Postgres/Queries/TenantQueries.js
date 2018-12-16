@@ -71,13 +71,14 @@ exports.get_tenant = (tenant_id) => {
   return p
 }
 
-exports.insert_tenant_favorites = (tenant_id, property_id) => {
+exports.insert_tenant_favorite = (tenant_id, property_id, meta) => {
   const p = new Promise((res, rej) => {
-    const values = [tenant_id, property_id]
-    const queryString = `INSERT INTO tenant_favorites (tenant_id, property_id)
-                              VALUES ($1, $2)
+    const values = [tenant_id, property_id, meta]
+    const queryString = `INSERT INTO tenant_favorites (tenant_id, property_id, meta)
+                              VALUES ($1, $2, $3)
                               ON CONFLICT (tenant_id, property_id)
-                              DO NOTHING
+                              DO UPDATE SET meta = $3,
+                                            updated_at = CURRENT_TIMESTAMP
                         `
 
     query(queryString, values, (err, results) => {
@@ -88,6 +89,31 @@ exports.insert_tenant_favorites = (tenant_id, property_id) => {
       res({
         message: 'Successfully favorited'
       })
+    })
+  })
+  return p
+}
+
+exports.get_favorites_for_tenant = (tenant_id) => {
+  const p = new Promise((res, rej) => {
+    const values = [tenant_id]
+    console.log(values)
+    const queryString = `SELECT *
+                           FROM tenant_favorites
+                          WHERE tenant_id = $1
+                        `
+
+    query(queryString, values, (err, results) => {
+      if (err) {
+        console.log('ERROR IN TenantQueries-get_favorites_for_tenant: ', err)
+        rej(err)
+      }
+      console.log(results.rows)
+      if (results && results.rowCount > 0) {
+        res(results.rows)
+      } else {
+        res([])
+      }
     })
   })
   return p
