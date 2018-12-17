@@ -8,6 +8,7 @@ const originCheck = require('./auth/originCheck').originCheck
 // routes
 const Test = require('./routes/test_routes')
 const TenantRoutes = require('./routes/tenant_routes')
+const TenantRegistrationRoutes = require('./routes/tenant_registration_routes')
 const PhoneRoutes = require('./routes/phone_routes')
 
 // bodyParser attempts to parse any request into JSON format
@@ -25,6 +26,10 @@ module.exports = function(app){
 
 	// Phone Routes
 	app.post('/verify_phone', [json_encoding], PhoneRoutes.verify_phone)
+
+	// Tenant Registration Routes
+	app.post('/register_tenant_phone', [json_encoding], TenantRegistrationRoutes.register_tenant_phone)
+	app.post('/register_tenant_email', [json_encoding], TenantRegistrationRoutes.register_tenant_email)
 
 
 	// Tenant Routes
