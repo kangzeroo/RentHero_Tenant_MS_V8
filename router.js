@@ -30,7 +30,7 @@ module.exports = function(app){
 	// Tenant Registration Routes
 	app.post('/register_tenant_phone', [json_encoding], TenantRegistrationRoutes.register_tenant_phone)
 	app.post('/register_tenant_email', [json_encoding], TenantRegistrationRoutes.register_tenant_email)
-
+	app.post('/update_tenant_name', [json_encoding], TenantRegistrationRoutes.update_tenant_name)
 
 	// Tenant Routes
 	app.post('/create_tenant', [json_encoding], TenantRoutes.create_tenant)

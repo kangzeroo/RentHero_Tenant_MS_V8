@@ -11,16 +11,17 @@ const moment = require('moment')
 const query = promisify(pool.query)
 
 
-exports.insert_tenant = (tenant_id, first_name, last_name, email, phone) => {
+exports.insert_tenant = (tenant_id, first_name, last_name, email, phone, authenticated) => {
   const p = new Promise((res, rej) => {
-    const values = [tenant_id, first_name, last_name, email, phone]
-    const queryString = `INSERT INTO tenants (tenant_id, first_name, last_name, email, phone_number)
-                            VALUES ($1, $2, $3, $4, $5)
+    const values = [tenant_id, first_name, last_name, email, phone, authenticated]
+    const queryString = `INSERT INTO tenants (tenant_id, first_name, last_name, email, phone_number, authenticated)
+                            VALUES ($1, $2, $3, $4, $5, $6)
                             ON CONFLICT (tenant_id)
                             DO UPDATE SET first_name = $2,
                                           last_name = $3,
                                           email = $4,
                                           phone_number = $5,
+                                          authenticated = $6,
                                           updated_at = CURRENT_TIMESTAMP
                             RETURNING tenant_id
                         `
@@ -113,6 +114,32 @@ exports.register_tenant_email = (tenant_id, email) => {
       })
     })
 
+  })
+  return p
+}
+
+exports.upsert_tenant_name = (tenant_id, first_name, authenticated) => {
+  const p = new Promise((res, rej) => {
+    const values = [tenant_id, first_name, authenticated]
+    const queryString = `INSERT INTO tenants (tenant_id, first_name, authenticated)
+                              VALUES ($1, $2, $3)
+                            ON CONFLICT (tenant_id)
+                            DO UPDATE SET first_name = $2,
+                                          authenticated = $3,
+                                          updated_at = CURRENT_TIMESTAMP
+                          RETURNING *
+                        `
+
+    query(queryString, values, (err, results) => {
+      if (err) {
+        console.log('ERROR IN TenantQueries-upsert_tenant_name: ', err)
+        rej('Failed to update')
+      }
+      res({
+        message: 'Successfully updated',
+        tenant: results.rows[0]
+      })
+    })
   })
   return p
 }
