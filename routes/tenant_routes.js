@@ -7,8 +7,9 @@ exports.create_tenant = (req, res, next) => {
   const last_name = info.last_name
   const phone = info.phone
   const email = info.email
+  const authenticated = info.authenticated
 
-  TenantQueries.insert_tenant(tenant_id, first_name, last_name, phone, email)
+  TenantQueries.insert_tenant(tenant_id, first_name, last_name, phone, email, authenticated)
     .then((data) => {
       res.json(data)
     })
@@ -20,7 +21,7 @@ exports.create_tenant = (req, res, next) => {
 
 exports.get_tenant = (req, res, next) => {
   const info = req.body
-  const tennat_id = info.tenant_id
+  const tenant_id = info.tenant_id
 
   TenantQueries.get_tenant(tenant_id)
     .then((data) => {

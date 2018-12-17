@@ -26,7 +26,7 @@ exports.register_tenant_phone = (req, res, next) => {
       }
     })
     .catch((err) => {
-      console.log('ERROR In tenant_routes-update_tenant_phone: ', err)
+      console.log('ERROR In tenant_registration_routes-update_tenant_phone: ', err)
       res.status(500).send(err)
     })
 }
@@ -54,7 +54,23 @@ exports.register_tenant_email = (req, res, next) => {
       }
     })
     .catch((err) => {
-      console.log('ERROR In tenant_routes-update_tenant_phone: ', err)
+      console.log('ERROR In tenant_registration_routes-update_tenant_phone: ', err)
+      res.status(500).send(err)
+    })
+}
+
+exports.update_tenant_name = (req, res, next) => {
+  const info = req.body
+  const tenant_id = info.tenant_id
+  const first_name = info.first_name
+  const authenticated = info.authenticated
+
+  TenantQueries.upsert_tenant_name(tenant_id, first_name, authenticated)
+    .then((data) => {
+      res.json(data)
+    })
+    .catch((err) => {
+      console.log('ERROR IN tenant_registration_routes-update_tenant_name')
       res.status(500).send(err)
     })
 }
