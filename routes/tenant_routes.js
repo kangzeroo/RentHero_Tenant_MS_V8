@@ -64,8 +64,12 @@ exports.remove_tenant_favorite = (req, res, next) => {
   const tenant_id = info.tenant_id
   const property_id = info.property_id
 
-  TenantQueires.remove_favorite_for_tenant(tenant_id, property_id)
+  TenantQueries.remove_favorite_for_tenant(tenant_id, property_id)
     .then((data) => {
+      return TenantQueries.get_favorites_for_tenant(tenant_id)
+    })
+    .then((data) => {
+      console.log(data)
       res.json(data)
     })
     .catch((err) => {

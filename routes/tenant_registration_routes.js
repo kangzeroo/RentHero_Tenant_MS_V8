@@ -7,8 +7,9 @@ exports.register_tenant_phone = (req, res, next) => {
   const national_format = info.national_format
   const country_code = info.country_code
   const email = info.email
+  const authenticated = info.authenticated
 
-  TenantQueries.register_tenant_phone(tenant_id, phone_number, national_format, country_code, email)
+  TenantQueries.register_tenant_phone(tenant_id, phone_number, national_format, country_code, email, authenticated)
     .then((data) => {
       if (data.account_exists) {
         TenantQueries.get_tenant(tenant_id)
@@ -35,8 +36,9 @@ exports.register_tenant_email = (req, res, next) => {
   const info = req.body
   const tenant_id = info.tenant_id
   const email = info.email
+  const authenticated = info.authenticated
 
-  TenantQueries.register_tenant_email(tenant_id, email)
+  TenantQueries.register_tenant_email(tenant_id, email, authenticated)
     .then((data) => {
       if (data.account_exists) {
         TenantQueries.get_tenant(tenant_id)

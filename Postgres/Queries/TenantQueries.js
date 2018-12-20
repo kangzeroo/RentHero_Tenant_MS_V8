@@ -50,13 +50,13 @@ exports.insert_tenant = (tenant_id, first_name, last_name, email, phone, authent
   return p
 }
 
-exports.register_tenant_phone = (tenant_id, phone_number, national_format, country_code, email) => {
+exports.register_tenant_phone = (tenant_id, phone_number, national_format, country_code, email, authenticated) => {
   const p = new Promise((res, rej) => {
-    const values = [tenant_id, phone_number, national_format, country_code, email]
-    const queryString = `INSERT INTO tenants (tenant_id, phone_number, national_format, country_code, email)
-                              VALUES ($1, $2, $3, $4, $5)
+    const values = [tenant_id, phone_number, national_format, country_code, email, authenticated]
+    const queryString = `INSERT INTO tenants (tenant_id, phone_number, national_format, country_code, email, authenticated)
+                              VALUES ($1, $2, $3, $4, $5, $6)
                               ON CONFLICT (phone_number)
-                              DO NOTHING
+                              DO UPDATE SET last_login = CURRENT_TIMESTAMP
                          RETURNING *
                         `
 
@@ -84,13 +84,13 @@ exports.register_tenant_phone = (tenant_id, phone_number, national_format, count
   return p
 }
 
-exports.register_tenant_email = (tenant_id, email) => {
+exports.register_tenant_email = (tenant_id, email, authenticated) => {
   const p = new Promise((res, rej) => {
-    const values = [tenant_id, email]
-    const queryString = `INSERT INTO tenants (tenant_id, email)
-                              VALUES ($1, $2)
+    const values = [tenant_id, email, authenticated]
+    const queryString = `INSERT INTO tenants (tenant_id, email, authenticated)
+                              VALUES ($1, $2, $3)
                               ON CONFLICT (email)
-                              DO NOTHING
+                              DO UPDATE SET last_login = CURRENT_TIMESTAMP
                           RETURNING *
                         `
     query(queryString, values, (err, results) => {
@@ -182,7 +182,7 @@ exports.insert_tenant_favorite = (tenant_id, property_id, meta) => {
         rej(err)
       }
       res({
-        message: 'Successfully favorited'
+        message: 'Saved to list'
       })
     })
   })
@@ -214,12 +214,12 @@ exports.get_favorites_for_tenant = (tenant_id) => {
   return p
 }
 
-exports.remove_tenant_favorite = (tenant_id, property_id) => {
+exports.remove_favorite_for_tenant = (tenant_id, property_id) => {
   const p = new Promise((res, rej) => {
     const values = [tenant_id, property_id]
     const queryString = `DELETE FROM tenant_favorites
                                WHERE tenant_id = $1
-                                 AND proerty_id = $2
+                                 AND property_id = $2
                         `
 
     query(queryString, values, (err, results) => {
