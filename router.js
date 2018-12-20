@@ -37,6 +37,7 @@ module.exports = function(app){
 	app.post('/get_tenant', [json_encoding], TenantRoutes.get_tenant)
 	app.post('/insert_tenant_favorite', [json_encoding], TenantRoutes.insert_tenant_favorite)
 	app.post('/get_favorites_for_tenant', [json_encoding], TenantRoutes.get_favorites_for_tenant)
+	app.post('/remove_tenant_favorite', [json_encoding], TenantRoutes.remove_tenant_favorite)
 
 	// RentHero Phone Routes
 	// app.post('/receive_sms_on_renthero_number', [twilio.webhook({ validate: false })], SMSRoutes.receive_sms_on_renthero_number)
