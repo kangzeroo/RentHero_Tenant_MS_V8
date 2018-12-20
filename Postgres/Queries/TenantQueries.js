@@ -213,3 +213,24 @@ exports.get_favorites_for_tenant = (tenant_id) => {
   })
   return p
 }
+
+exports.remove_tenant_favorite = (tenant_id, property_id) => {
+  const p = new Promise((res, rej) => {
+    const values = [tenant_id, property_id]
+    const queryString = `DELETE FROM tenant_favorites
+                               WHERE tenant_id = $1
+                                 AND proerty_id = $2
+                        `
+
+    query(queryString, values, (err, results) => {
+      if (err) {
+        console.log('ERROR IN TenantQueries-remove_tenant_favorite: ', err)
+        rej(err)
+      }
+      res({
+        message: 'Removed Favorite'
+      })
+    })
+  })
+  return p
+}

@@ -39,15 +39,39 @@ exports.insert_tenant_favorite = (req, res, next) => {
   const property_id = info.property_id
   const meta = info.meta
 
+  let message
+
   TenantQueries.insert_tenant_favorite(tenant_id, property_id, meta)
     .then((data) => {
-      res.json(data)
+      message = data
+
+      return TenantQueries.get_favorites_for_tenant(tenant_id)
+    })
+    .then((data) => {
+      res.json({
+        favorites: data,
+        message: message.message,
+      })
     })
     .catch((err) => {
       console.log('ERROR IN tenant_routes-insert_tenant_favorite: ', err)
       res.status(500).send(err)
     })
+}
 
+exports.remove_tenant_favorite = (req, res, next) => {
+  const info = req.body
+  const tenant_id = info.tenant_id
+  const property_id = info.property_id
+
+  TenantQueires.remove_favorite_for_tenant(tenant_id, property_id)
+    .then((data) => {
+      res.json(data)
+    })
+    .catch((err) => {
+      console.log('ERROR IN tenant_routes-remove_tenant_favorite: ', err)
+      res.status(500).send(err)
+    })
 }
 
 exports.get_favorites_for_tenant = (req, res, next) => {
