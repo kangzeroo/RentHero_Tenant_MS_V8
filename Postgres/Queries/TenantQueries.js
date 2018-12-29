@@ -135,10 +135,18 @@ exports.upsert_tenant_name = (tenant_id, first_name, authenticated) => {
         console.log('ERROR IN TenantQueries-upsert_tenant_name: ', err)
         rej('Failed to update')
       }
-      res({
-        message: 'Successfully updated',
-        tenant: results.rows[0]
-      })
+      if (results && results.rowCount > 0) {
+        res({
+          message: 'Successfully updated',
+          tenant: results.rows[0]
+        })
+      } else {
+        console.log('ERROR: ', results)
+        res({
+          message: 'Name updated'
+        })
+      }
+
     })
   })
   return p
