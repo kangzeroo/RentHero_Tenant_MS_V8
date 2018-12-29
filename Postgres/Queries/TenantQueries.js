@@ -67,18 +67,20 @@ exports.register_tenant_phone = (tenant_id, phone_number, national_format, count
       }
       console.log(results)
 
-      if (results && results.rowCount === 0) {
+      if (results && results.rowCount > 0) {
         // already exists
+        res({
+          message: 'Successful Registration',
+          account_exists: false,
+          tenant: results.rows[0]
+        })
+      } else {
         res({
           message: 'An account with this phone number already exists',
           account_exists: true,
         })
       }
-      res({
-        message: 'Successful Registration',
-        account_exists: false,
-        tenant: results.rows[0]
-      })
+
     })
   })
   return p
