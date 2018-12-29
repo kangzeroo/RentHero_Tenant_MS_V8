@@ -211,7 +211,6 @@ exports.get_favorites_for_tenant = (tenant_id) => {
         console.log('ERROR IN TenantQueries-get_favorites_for_tenant: ', err)
         rej(err)
       }
-      console.log(results.rows)
       if (results && results.rowCount > 0) {
         res(results.rows)
       } else {
