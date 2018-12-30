@@ -55,8 +55,14 @@ exports.register_tenant_phone = (tenant_id, phone_number, national_format, count
     const values = [tenant_id, phone_number, national_format, country_code, email, authenticated]
     const queryString = `INSERT INTO tenants (tenant_id, phone_number, national_format, country_code, email, authenticated)
                               VALUES ($1, $2, $3, $4, $5, $6)
-                              ON CONFLICT (phone_number)
-                              DO UPDATE SET last_login = CURRENT_TIMESTAMP
+                              ON CONFLICT (tenant_id)
+                              DO UPDATE SET phone_number = $2,
+                                            national_format = $3,
+                                            country_code = $4,
+                                            email = $5,
+                                            authenticated = $6,
+                                            last_login = CURRENT_TIMESTAMP,
+                                            updated_at = CURRENT_TIMESTAMP
                          RETURNING *
                         `
 
@@ -65,7 +71,7 @@ exports.register_tenant_phone = (tenant_id, phone_number, national_format, count
         console.log('ERROR IN TenantQueries-insert_tenant_phone: ', err)
         rej('An Error Occurred')
       }
-      console.log(results)
+      // console.log(results)
 
       if (results && results.rowCount > 0) {
         // already exists
@@ -91,8 +97,11 @@ exports.register_tenant_email = (tenant_id, email, authenticated) => {
     const values = [tenant_id, email, authenticated]
     const queryString = `INSERT INTO tenants (tenant_id, email, authenticated)
                               VALUES ($1, $2, $3)
-                              ON CONFLICT (email)
-                              DO UPDATE SET last_login = CURRENT_TIMESTAMP
+                              ON CONFLICT (tenant_id)
+                              DO UPDATE SET email = $2,
+                                            authenticated = $3,
+                                            last_login = CURRENT_TIMESTAMP,
+                                            updated_at = CURRENT_TIMESTAMP
                           RETURNING *
                         `
     query(queryString, values, (err, results) => {
@@ -100,7 +109,7 @@ exports.register_tenant_email = (tenant_id, email, authenticated) => {
         console.log('ERROR IN TenantQueries-insert_tenant_email: ', err)
         rej('An Error Occurred')
       }
-      console.log(results)
+      // console.log(results)
 
       if (results && results.rowCount === 0) {
         // already exists
