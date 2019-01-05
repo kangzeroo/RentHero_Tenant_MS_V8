@@ -50,43 +50,95 @@ exports.insert_tenant = (tenant_id, first_name, last_name, email, phone, authent
   return p
 }
 
+
+// register tenant phone
+//    if phone number exists,
+//      update everything else
+//    if phone number doesnt exist,
+//      upsert
 exports.register_tenant_phone = (tenant_id, phone_number, national_format, country_code, email, authenticated) => {
   const p = new Promise((res, rej) => {
-    const values = [tenant_id, phone_number, national_format, country_code, email, authenticated]
-    const queryString = `INSERT INTO tenants (tenant_id, phone_number, national_format, country_code, email, authenticated)
-                              VALUES ($1, $2, $3, $4, $5, $6)
-                              ON CONFLICT (tenant_id)
-                              DO UPDATE SET phone_number = $2,
-                                            national_format = $3,
-                                            country_code = $4,
-                                            email = $5,
-                                            authenticated = $6,
-                                            last_login = CURRENT_TIMESTAMP,
-                                            updated_at = CURRENT_TIMESTAMP
-                         RETURNING *
-                        `
 
-    query(queryString, values, (err, results) => {
+    query('BEGIN', (err) => {
       if (err) {
-        console.log('ERROR IN TenantQueries-insert_tenant_phone: ', err)
-        rej('An Error Occurred')
-      }
-      // console.log(results)
-
-      if (results && results.rowCount > 0) {
-        // already exists
-        res({
-          message: 'Successful Registration',
-          account_exists: false,
-          tenant: results.rows[0]
-        })
-      } else {
-        res({
-          message: 'An account with this phone number already exists',
-          account_exists: true,
-        })
+        console.log(err)
+        rej(err)
       }
 
+      const vals = [phone_number]
+      const queryString1 = `SELECT * FROM tenants WHERE phone_number = $1`
+
+      query(queryString1, vals, (err, results) => {
+        if (err) {
+          console.log(err)
+          rej(err)
+        }
+
+        if (results && results.rowCount > 0) {
+          query('COMMIT', (err) => {
+            if (err) {
+              console.log(err)
+              rej(err)
+            }
+
+            res({
+              message: 'Successful Login',
+              account_exists: false,
+              tenant: results.rows[0],
+            })
+          })
+        } else {
+          const values = [tenant_id, phone_number, national_format, country_code, email, authenticated]
+          const queryString = `INSERT INTO tenants (tenant_id, phone_number, national_format, country_code, email, authenticated)
+                                    VALUES ($1, $2, $3, $4, $5, $6)
+                                    ON CONFLICT (tenant_id)
+                                    DO UPDATE SET phone_number = $2,
+                                                  national_format = $3,
+                                                  country_code = $4,
+                                                  email = $5,
+                                                  authenticated = $6,
+                                                  last_login = CURRENT_TIMESTAMP,
+                                                  updated_at = CURRENT_TIMESTAMP
+                               RETURNING *
+                              `
+
+          query(queryString, values, (err, results) => {
+            if (err) {
+              console.log('ERROR IN TenantQueries-insert_tenant_phone: ', err)
+              rej('An Error Occurred')
+            }
+            // console.log(results)
+
+            if (results && results.rowCount > 0) {
+              // already exists
+              query('COMMIT', (err) => {
+                if (err) {
+                  console.log(err)
+                  rej(err)
+                }
+
+                res({
+                  message: 'Successful Registration',
+                  account_exists: false,
+                  tenant: results.rows[0]
+                })
+              })
+            } else {
+              query('COMMIT', (err) => {
+                if (err) {
+                  console.log(err)
+                  rej(err)
+                }
+
+                res({
+                  message: 'An account with this phone number already exists',
+                  account_exists: true,
+                })
+              })
+            }
+          })
+        }
+      })
     })
   })
   return p
@@ -94,37 +146,84 @@ exports.register_tenant_phone = (tenant_id, phone_number, national_format, count
 
 exports.register_tenant_email = (tenant_id, email, authenticated) => {
   const p = new Promise((res, rej) => {
-    const values = [tenant_id, email, authenticated]
-    const queryString = `INSERT INTO tenants (tenant_id, email, authenticated)
-                              VALUES ($1, $2, $3)
-                              ON CONFLICT (tenant_id)
-                              DO UPDATE SET email = $2,
-                                            authenticated = $3,
-                                            last_login = CURRENT_TIMESTAMP,
-                                            updated_at = CURRENT_TIMESTAMP
-                          RETURNING *
-                        `
-    query(queryString, values, (err, results) => {
-      if (err) {
-        console.log('ERROR IN TenantQueries-insert_tenant_email: ', err)
-        rej('An Error Occurred')
-      }
-      // console.log(results)
 
-      if (results && results.rowCount === 0) {
-        // already exists
-        res({
-          message: 'An account with this email address already exists',
-          account_exists: true,
-        })
+    query('BEGIN', (err) => {
+      if (err) {
+        console.log(err)
+        rej(err)
       }
-      res({
-        message: 'Successful Registration',
-        account_exists: false,
-        tenant: results.rows[0]
+
+      const vals = [email]
+      const queryString1 = `SELECT * FROM tenants WHERE email = $1`
+
+      query(queryString1, vals, (err, results) => {
+        if (err) {
+          console.log(err)
+          rej(err)
+        }
+
+        if (results && results.rowCount > 0) {
+          query('COMMIT', (err) => {
+            if (err) {
+              console.log(err)
+              rej(err)
+            }
+
+            res({
+              message: 'Successful Registration',
+              account_exists: false,
+              tenant: results.rows[0]
+            })
+          })
+        } else {
+          const values = [tenant_id, email, authenticated]
+          const queryString = `INSERT INTO tenants (tenant_id, email, authenticated)
+                                    VALUES ($1, $2, $3)
+                                    ON CONFLICT (tenant_id)
+                                    DO UPDATE SET email = $2,
+                                                  authenticated = $3,
+                                                  last_login = CURRENT_TIMESTAMP,
+                                                  updated_at = CURRENT_TIMESTAMP
+                                RETURNING *
+                              `
+          query(queryString, values, (err, results) => {
+            if (err) {
+              console.log('ERROR IN TenantQueries-insert_tenant_email: ', err)
+              rej('An Error Occurred')
+            }
+            // console.log(results)
+
+            if (results && results.rowCount === 0) {
+              // already exists
+              query('COMMIT', (err) => {
+                if (err) {
+                  console.log(err)
+                  rej(err)
+                }
+
+                res({
+                  message: 'An account with this email address already exists',
+                  account_exists: true,
+                })
+              })
+            } else {
+              query('COMMIT', (err) => {
+                if (err) {
+                  console.log(err)
+                  rej(err)
+                }
+
+                res({
+                  message: 'Successful Registration',
+                  account_exists: false,
+                  tenant: results.rows[0]
+                })
+              })
+            }
+          })
+        }
       })
     })
-
   })
   return p
 }
